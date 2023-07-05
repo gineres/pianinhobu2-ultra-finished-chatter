@@ -44,6 +44,12 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+function SendMessage(){
+    const messageText = document.getElementById('messageInput').value;
+    socket.emit("SendMessage", messageText);
+    console.log(messageText);
+}
+
 //Checa se o usuário tá logado, se sim, muda de página para a página de login
 function IsLoggedIn(){ //RODAR ASSIM QUE ENTRAR?
     const meuid = localStorage.getItem('meuid');
@@ -57,6 +63,11 @@ socket.on('NewUserNotification', (msg) => {
 
 socket.on('ChatRedirectLogin', (msg) => {
     window.location.href = "http://localhost:3000";
+});
+
+socket.on('NewMessage', (msg) => {
+    const mensagens = document.getElementById('mensagens');
+    mensagens.innerHTML += `<p style="color: green">${msg}</p>`;
 });
 
 

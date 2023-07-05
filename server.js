@@ -67,6 +67,9 @@ async function checkForPassword(username, email, password){
 app.use(express.static(path.join(__dirname, '.')));
 
 io.on('connection', socket => {
+    console.log('SOCKET NOVO NA AREA');
+    
+    // AUTHENTICATION
     socket.on('Register', async (username, email, password) => {
         const isUserValid = await checkForUsernameAndEmail(username, email);
         if ( isUserValid ) {
@@ -92,18 +95,7 @@ io.on('connection', socket => {
                 username: username
             }
             sessions[session.sessionId] = session; //adiciona sessão com ID único
-            
-            /* IRRELEVANTE POR ENQUANTO, JÁ QUE O JOGADOR PRECISA ATUALIZAR A PÁGINA PRA LOGAR...
-            const player = {
-                session = sessions[session.sessionId];
-                posX: 100,
-                socketId: socket.id,
-            }
 
-            activePlayers[player.socketId] = player; //adiciona websocket relacionado à sessão do jogador
-            */
-
-            //players.push(player);
             console.log("OVCE ENTROU");
             //io.emit('players', players);
             //socket.emit('Message', 'paravbens voce entrou'); NAO FUNCIONA
@@ -119,17 +111,6 @@ io.on('connection', socket => {
 
         if (session !== undefined) {
             console.log('você está conectado!');
-            
-            /* INÚTIL JÁ QUE VAI REDIRECIONAR MESMO ASSIM
-            const player = {
-                session: sessions[session.sessionId],
-                posX: 100,
-                socketId: socket.id,
-            }
-
-            activePlayers[player.socketId] = player;
-            */
-
             socket.emit('ChatRedirect', 'Você entrou na sala!');
         }
         else{
@@ -137,6 +118,7 @@ io.on('connection', socket => {
         }
     });
 
+    //CHAT - LOBBY
     socket.on('CheckChatSession', (sessionId) => {
         let session = sessions[sessionId];
 
@@ -156,8 +138,16 @@ io.on('connection', socket => {
             console.log('VOCÊ FOI DESCONECTADO');
             socket.emit('ChatRedirectLogin', 'VOCÊ FOI DESCONECTADO');
         }
-    })
-    console.log('SOCKET NOVO NA AREA');
+    });
+
+    socket.on('SendMessage', (msg) => {
+        //filtrar se o texto tem "to [username]: antes, se sim, envia mensagem privada, se não, envia msg global"
+        const remetente = activePlayers[socket.id].session.username;
+        const formattedText = `${remetente}: ${msg}`;
+        io.emit('NewMessage', formattedText);
+    });
+
+    //GAME
 });
 
 const PORT = 3000;
