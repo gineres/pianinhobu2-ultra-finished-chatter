@@ -65,19 +65,15 @@ async function checkForUsernameAndEmail(username, email){
 async function checkForPassword(username, email, password){
     const snapshot = await getDocs(collection(db, "users"));
     const usernames = snapshot.docs.map((doc) => doc.data().username);
-    const emails = snapshot.docs.map((doc) => doc.data().email);
     const passwords = snapshot.docs.map((doc) => doc.data().password);
-    /*
+    
     console.log(usernames);
-    console.log(emails);
     console.log(passwords);
-    */
 
     const usernameIndex = usernames.findIndex((currUsername) => currUsername === username);
-    const emailIndex = emails.findIndex((currEmail) => currEmail === email);
 
-    if (usernameIndex !== -1 || emailIndex !== -1) {
-        if (passwords[usernameIndex] === password || passwords[emailIndex] === password) {
+    if (usernameIndex !== -1) {
+        if (passwords[usernameIndex] === password) {
             return true;
         }
     }

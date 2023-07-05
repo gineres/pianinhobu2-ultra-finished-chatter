@@ -10,7 +10,10 @@ function Register(){
 }
 
 function Login(){
-    socket.emit("Login");
+    const username = document.loginForm.elements['username'].value;
+    const email = document.loginForm.elements['email'].value;
+    const password = document.loginForm.elements['password'].value;
+    socket.emit("Login", username, email, password);
 }
 
 //Checa se o usuário tá logado, se sim, muda de página para a página do chat
