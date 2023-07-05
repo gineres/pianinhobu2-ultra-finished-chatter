@@ -23,27 +23,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
-/*
-app.post("/createUser", async (req, res) => {
-    const data = req.body;
-    console.log("Data of users ", data);
-    //await User.add(data);
-    try {
-        const docRef = await addDoc(collection(db, "users"), data);
-        console.log("Document written with ID: ", docRef.id);
-        res.send({msg: "User added!"});
-    } catch (e) {
-        console.error("Error adding document: ", e);
-    }
-});
-
-app.get("/", async (req, res) => {
-    const snapshot = await getDocs(collection(db, "users"));
-    const usernames = snapshot.docs.map((doc) => doc.data().username);
-    console.log(usernames);
-    const list = snapshot.docs.map((doc) => doc.data());
-    res.send(list);
-});*/
+let players = [];
 
 async function checkForUsernameAndEmail(username, email){
     const snapshot = await getDocs(collection(db, "users"));
@@ -84,6 +64,7 @@ async function checkForPassword(username, email, password){
 app.use(express.static(path.join(__dirname, '.')));
 
 io.on('connection', socket => {
+
     socket.on('Register', async (username, email, password) => {
         const isUserValid = await checkForUsernameAndEmail(username, email);
         if ( isUserValid ) {
@@ -100,22 +81,35 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('Login', async (username, email, password) => {
+    socket.on('Login', async (username, email, password, sessionId) => {
         const isLoginValid = await checkForPassword(username, email, password);
         if (isLoginValid) {
             //A FUNÇÃO É PRA PEGAR UM "SESSIONID" E ADICIONAR ESSE SESSION ID NA LISTA DE PLAYERS ATIVOS NO SERVIDOR
-            console.log("paravbens voce entrou");
+            const player = {
+                username: username,
+                posX: 100,
+                sessionId: sessionId,
+                socketId: socket.id,
+            }
+            players.push(player);
+            console.log("OVCE ENTROU");
+            //io.emit('players', players);
+            //socket.emit('Message', 'paravbens voce entrou'); NAO FUNCIONA
         }
         else {
             console.log("INFORMAÇÕES ERRADAS");
         }
-        //Login();
     });
 
-    socket.on('CheckSession', () => {
+    socket.on('CheckSession', (sessionId) => {
         console.log('checando sessão...');
+        players.forEach(player => {
+            if (player.sessionId === sessionId) {
+                console.log('você está conectado!');
+                socket.emit('ChatRedirect');
+            }
+        });
     });
-
     console.log('muaisda');
 });
 
