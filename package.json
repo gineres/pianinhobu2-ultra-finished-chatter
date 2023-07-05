@@ -1,0 +1,21 @@
+{
+  "name": "pianinho",
+  "version": "1.0.0",
+  "description": "Piano tiles socket.io",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "gineres",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "firebase": "^9.23.0",
+    "fs": "^0.0.1-security",
+    "socket.io": "^4.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
