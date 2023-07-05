@@ -25,6 +25,9 @@ const db = getFirestore(firebaseApp);
 
 let players = [];
 
+let activePlayers = {};
+let sessions = {};
+
 async function checkForUsernameAndEmail(username, email){
     const snapshot = await getDocs(collection(db, "users"));
     const usernames = snapshot.docs.map((doc) => doc.data().username);
@@ -64,7 +67,6 @@ async function checkForPassword(username, email, password){
 app.use(express.static(path.join(__dirname, '.')));
 
 io.on('connection', socket => {
-
     socket.on('Register', async (username, email, password) => {
         const isUserValid = await checkForUsernameAndEmail(username, email);
         if ( isUserValid ) {
@@ -85,13 +87,23 @@ io.on('connection', socket => {
         const isLoginValid = await checkForPassword(username, email, password);
         if (isLoginValid) {
             //A FUNÇÃO É PRA PEGAR UM "SESSIONID" E ADICIONAR ESSE SESSION ID NA LISTA DE PLAYERS ATIVOS NO SERVIDOR
-            const player = {
-                username: username,
-                posX: 100,
+            const session = {
                 sessionId: sessionId,
+                username: username
+            }
+            sessions[session.sessionId] = session; //adiciona sessão com ID único
+            
+            /* IRRELEVANTE POR ENQUANTO, JÁ QUE O JOGADOR PRECISA ATUALIZAR A PÁGINA PRA LOGAR...
+            const player = {
+                session = sessions[session.sessionId];
+                posX: 100,
                 socketId: socket.id,
             }
-            players.push(player);
+
+            activePlayers[player.socketId] = player; //adiciona websocket relacionado à sessão do jogador
+            */
+
+            //players.push(player);
             console.log("OVCE ENTROU");
             //io.emit('players', players);
             //socket.emit('Message', 'paravbens voce entrou'); NAO FUNCIONA
@@ -103,14 +115,49 @@ io.on('connection', socket => {
 
     socket.on('CheckSession', (sessionId) => {
         console.log('checando sessão...');
-        players.forEach(player => {
-            if (player.sessionId === sessionId) {
-                console.log('você está conectado!');
-                socket.emit('ChatRedirect');
+        let session = sessions[sessionId];
+
+        if (session !== undefined) {
+            console.log('você está conectado!');
+            
+            /* INÚTIL JÁ QUE VAI REDIRECIONAR MESMO ASSIM
+            const player = {
+                session: sessions[session.sessionId],
+                posX: 100,
+                socketId: socket.id,
             }
-        });
+
+            activePlayers[player.socketId] = player;
+            */
+
+            socket.emit('ChatRedirect', 'Você entrou na sala!');
+        }
+        else{
+            console.log('do nothing');
+        }
     });
-    console.log('muaisda');
+
+    socket.on('CheckChatSession', (sessionId) => {
+        let session = sessions[sessionId];
+
+        if (session !== undefined) {
+            console.log('você está conectado!');
+            const player = {
+                session: sessions[session.sessionId],
+                posX: 100,
+                socketId: socket.id,
+            }
+
+            activePlayers[player.socketId] = player;
+            //socket.emit('Chat first text');
+            io.emit('NewUserNotification', session.username + " just entered the room!");
+        }
+        else{
+            console.log('VOCÊ FOI DESCONECTADO');
+            socket.emit('ChatRedirectLogin', 'VOCÊ FOI DESCONECTADO');
+        }
+    })
+    console.log('SOCKET NOVO NA AREA');
 });
 
 const PORT = 3000;

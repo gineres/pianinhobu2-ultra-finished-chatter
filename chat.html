@@ -15,53 +15,11 @@
   <body>
     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"><canvas id="gameCanvas" width="800" height="400"></canvas></div>
 
-    <script>
-      // Initialize the canvas and player variables
-      var canvas = document.getElementById("gameCanvas");
-      var context = canvas.getContext("2d");
-      var playerX = 200;
-      var playerY = 250;
+    <h1 style="color: skyblue">MENSAGENS:</h1>
+    <div id="mensagens">
 
-      // Keyboard event listeners
-      var keys = [];
-      document.addEventListener("keydown", function (e) {
-        keys[e.keyCode] = true;
-      });
-      document.addEventListener("keyup", function (e) {
-        keys[e.keyCode] = false;
-      });
-
-      // Function to update the player's position
-      function updatePlayerPosition() {
-        if (keys[37]) {
-          // Left arrow key
-          playerX -= 5;
-        }
-        if (keys[39]) {
-          // Right arrow key
-          playerX += 5;
-        }
-      }
-
-      // Function to update the graphics
-      function updateGraphics() {
-        // Clear the canvas
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw the player
-        context.fillStyle = "red";
-        context.fillRect(playerX, playerY, 20, 20);
-      }
-
-      // Game loop
-      function gameLoop() {
-        updatePlayerPosition();
-        updateGraphics();
-        requestAnimationFrame(gameLoop);
-      }
-
-      // Start the game loop
-      gameLoop();
-    </script>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./chatCliente.js"></script>
   </body>
 </html>
