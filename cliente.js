@@ -47,9 +47,6 @@ function alterar_meuid() {
 
 socket.on('ChatRedirect', (msg) => {
     window.location.href = "http://localhost:3000/chat.html";
-    /* NÃO FUNCIONA PQ MUDA DE TAB ABESTALHADA
-    const mensagens = document.getElementById('mensagens')
-    mensagens.innerHTML += `<p>${msg}</p>`*/
 });
 
 // esse código abaixo roda na primeira vez que a página é carregada,

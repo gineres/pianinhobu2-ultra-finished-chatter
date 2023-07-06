@@ -23,8 +23,6 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
-let players = [];
-
 let activePlayers = {};
 let sessions = {};
 
@@ -68,7 +66,7 @@ app.use(express.static(path.join(__dirname, '.')));
 
 io.on('connection', socket => {
     console.log('SOCKET NOVO NA AREA');
-    
+
     // AUTHENTICATION
     socket.on('Register', async (username, email, password) => {
         const isUserValid = await checkForUsernameAndEmail(username, email);
@@ -124,16 +122,22 @@ io.on('connection', socket => {
 
         if (session !== undefined) {
             console.log('você está conectado!');
+            //checar se já tem outro socket ativo com a mesma sessão, se sim, usar socket.disconnect() nele e copiar as informações de cor e posição pra o novo socket
+            //Solução 2: colocar todos os sockets de uma mesma sessão dentro de uma sala (com o ID da sessão), e todos os usuários dessa sala vão se comportar de maneiras idênticas, porque são o mesmo usuário
+            //por enquanto, ignorar isso e fazer sockets individuais funcionarem
+
             const player = {
                 session: sessions[session.sessionId],
-                posX: 100,
                 socketId: socket.id,
+                posX: 200,
+                color: Math.floor(Math.random()*16777215).toString(16) //Sorteando cor aleatória
             }
 
             activePlayers[player.socketId] = player;
             //socket.emit('Chat first text');
-            io.emit('NewUserNotification', session.username + " just entered the room!");
+            io.emit('NewUserNotification', session.username + " just entered the room!", player.posX, player.color, player.session);
         }
+
         else{
             console.log('VOCÊ FOI DESCONECTADO');
             socket.emit('ChatRedirectLogin', 'VOCÊ FOI DESCONECTADO');
@@ -145,6 +149,19 @@ io.on('connection', socket => {
         const remetente = activePlayers[socket.id].session.username;
         const formattedText = `${remetente}: ${msg}`;
         io.emit('NewMessage', formattedText);
+    });
+
+    
+    socket.on('LeftKeyPressed', () => {
+        const user = activePlayers[socket.id];
+        user.posX -= 5;
+        io.emit('UpdatingPlayerPositions', user.posX, user.session.sessionId);
+    });
+
+    socket.on('RightKeyPressed', () => {
+        const user = activePlayers[socket.id];
+        user.posX += 5;
+        io.emit('UpdatingPlayerPositions', user.posX, user.session.sessionId);
     });
 
     //GAME
