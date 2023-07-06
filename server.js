@@ -130,7 +130,7 @@ io.on('connection', socket => {
                 session: sessions[session.sessionId],
                 socketId: socket.id,
                 posX: 200,
-                color: Math.floor(Math.random()*16777215).toString(16) //Sorteando cor aleatória
+                color: "#"+Math.floor(Math.random()*16777215).toString(16) //Sorteando cor aleatória
             }
 
             activePlayers[player.socketId] = player;
