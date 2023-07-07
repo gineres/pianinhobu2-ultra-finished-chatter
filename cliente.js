@@ -2,10 +2,12 @@
 //TRAZER O FIREBASE PRA O CLIENTE, E APENAS USAR O SERVIDOR PARA O CLIENTE MANDAR AS INFORMAÇÕES SE ELE TÁ LOGADO OU NÃO
 const socket = io();
 const meuIdSpan = document.getElementById('meuid');
+let hourglassInterval; //variavel do reloginho
 
 function hourglass() { //FUNCAO PRA RODAR O RELOGINHO BONITINHO
     var a;
     a = document.getElementById("div1");
+    a.setAttribute('class', 'fa');
     a.innerHTML = "&#xf251;";
     setTimeout(function () {
         a.innerHTML = "&#xf252;";
@@ -20,11 +22,12 @@ function Register(){
     const email = document.registerForm.elements['email'].value;
     const password = document.registerForm.elements['password'].value;
     socket.emit("Register", username, email, password);
+    /*
     setTimeout(function() {
         window.location.href = 'http://localhost:3000'; // Replace with the desired URL
-    }, 3000); // Replace 2000 with the desired delay in milliseconds
+    }, 3000); // Replace 2000 with the desired delay in milliseconds*/
     hourglass();
-    setInterval(hourglass, 3000);
+    hourglassInterval = setInterval(hourglass, 3000); //coloca o intervalo dentro da variavel
 }
 
 function Login(){
@@ -33,11 +36,12 @@ function Login(){
     const password = document.loginForm.elements['password'].value;
     const meuid = localStorage.getItem('meuid');
     socket.emit("Login", username, email, password, meuid);
+    /*
     setTimeout(function() {
         window.location.href = 'http://localhost:3000'; // Replace with the desired URL
-    }, 3000); // Replace 2000 with the desired delay in milliseconds
+    }, 3000); // Replace 2000 with the desired delay in milliseconds*/
     hourglass();
-    setInterval(hourglass, 3000);
+    hourglassInterval = setInterval(hourglass, 3000);
 }
 
 //Checa se o usuário tá logado, se sim, muda de página para a página do chat
@@ -50,7 +54,6 @@ function IsLoggedIn(){ //RODAR ASSIM QUE ENTRAR?
 function ver_meuid() {
     // obtendo id do localstorage (chave: 'meuid')
     const meuid = localStorage.getItem('meuid');
-
     if (meuid) {
     // mostrando o id no span chamado "meuid"
     meuIdSpan.innerText = meuid;
@@ -70,6 +73,37 @@ function alterar_meuid() {
 socket.on('ChatRedirect', (msg) => {
     window.location.href = "http://localhost:3000/chat.html";
 });
+
+socket.on('LoginEvents', (msg) => {
+    if (msg === 'SUCCESS') { //SE O LOGIN DER CERTO, VAI PRO CHAT
+        window.location.href = "http://localhost:3000/chat.html";
+    }
+    else { // SE NAO MOSTRA O ERORO
+        const messages = document.getElementById('messages');
+        messages.innerHTML += `<p style="color: red">${msg}</p>`;
+        clearInterval(hourglassInterval);
+        const divElement = document.getElementById('div1');
+        divElement.removeAttribute('class');
+    }
+});
+
+socket.on('RegisterEvents', (msg) => {
+    if (msg === 'SUCCESS') { //SE O LOGIN DER CERTO, VAI PRO LOGIN
+        window.location.href = "http://localhost:3000/";
+    }
+    else { // SE NAO MOSTRA O ERORO
+        const messages = document.getElementById('messages');
+        messages.innerHTML += `<p style="color: red">${msg}</p>`;
+        clearInterval(hourglassInterval);
+        const divElement = document.getElementById('div1');
+        divElement.removeAttribute('class');
+    }
+});
+
+/*
+socket.on('TESTE', (msg) => {
+    console.log(msg);
+});*/
 
 // esse código abaixo roda na primeira vez que a página é carregada,
 // já mostrando o id do usuário que está no localStorage

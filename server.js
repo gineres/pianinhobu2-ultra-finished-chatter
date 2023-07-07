@@ -23,6 +23,22 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
+const originalConsoleLog = console.log;
+console.log = function(...args) {
+  const message = args[0];
+  const socket = args[1];
+  const socketEvent = args[2];
+
+  // Perform custom actions with the socket argument
+  if (typeof socket !== 'undefined') {
+    socket.emit(socketEvent, message);
+  }
+
+  // Call the original console.log() to output the log as usual
+  originalConsoleLog.apply(console, args);
+};
+
+
 let activePlayers = {};
 let sessions = {};
 
@@ -74,13 +90,16 @@ io.on('connection', socket => {
             const data = {username: username, email: email, password: password};
             try {
                 const docRef = await addDoc(collection(db, "users"), data);
-                console.log("Document written with ID: ", docRef.id);
+                //console.log("Document written with ID: " + docRef.id);
+                console.log("SUCCESS",socket,"RegisterEvents");
+                //console.log("AAAAAAAAA", socket);
             } catch (e) {
-                console.error("Error adding document: ", e);
+                //console.error("Error adding document: " + e);
+                console.log("PROBLEMA NO SISTEMA",socket,"RegisterEvents");
             }
         }
         else {
-            console.log("Email or username already registered");
+            console.log("Email or username already registered",socket,"RegisterEvents");
         }
     });
 
@@ -94,12 +113,12 @@ io.on('connection', socket => {
             }
             sessions[session.sessionId] = session; //adiciona sessão com ID único
 
-            console.log("OVCE ENTROU");
+            console.log("SUCCESS",socket,"LoginEvents");
             //io.emit('players', players);
             //socket.emit('Message', 'paravbens voce entrou'); NAO FUNCIONA
         }
         else {
-            console.log("INFORMAÇÕES ERRADAS");
+            console.log("INFORMAÇÕES ERRADAS",socket,"LoginEvents");
         }
     });
 
