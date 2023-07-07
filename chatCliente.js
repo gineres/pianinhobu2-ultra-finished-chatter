@@ -86,6 +86,7 @@ function SendMessage(){
     const messageText = document.getElementById('messageInput').value;
     socket.emit("SendMessage", messageText);
     console.log(messageText);
+    document.getElementById('messageInput').value = "";
 }
 
 socket.on('NewUserNotification', (msg, position, color, session) => {
@@ -103,6 +104,21 @@ socket.on('NewUserNotification', (msg, position, color, session) => {
             playerColor: color,
             username: session.username
         };
+    }
+});
+
+socket.on('GetActivePlayers', (playerList) => {
+    console.log('Pegando os players ativos...');
+    for (let key in playerList){
+        if (playerList.hasOwnProperty(key)) {
+            console.log(playerList[key]);
+            otherPlayers[playerList[key].session.sessionId] = {
+                playerX: playerList[key].posX,
+                playerY: playerY,
+                playerColor: playerList[key].color,
+                username: playerList[key].session.username
+            }
+        }
     }
 });
 

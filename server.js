@@ -121,7 +121,8 @@ io.on('connection', socket => {
         let session = sessions[sessionId];
 
         if (session !== undefined) {
-            console.log('você está conectado!');
+            //console.log('você está conectado!');
+            socket.emit('GetActivePlayers', activePlayers);
             //checar se já tem outro socket ativo com a mesma sessão, se sim, usar socket.disconnect() nele e copiar as informações de cor e posição pra o novo socket
             //Solução 2: colocar todos os sockets de uma mesma sessão dentro de uma sala (com o ID da sessão), e todos os usuários dessa sala vão se comportar de maneiras idênticas, porque são o mesmo usuário
             //por enquanto, ignorar isso e fazer sockets individuais funcionarem
