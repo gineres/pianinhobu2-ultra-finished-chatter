@@ -22,10 +22,6 @@ function Register(){
     const email = document.registerForm.elements['email'].value;
     const password = document.registerForm.elements['password'].value;
     socket.emit("Register", username, email, password);
-    /*
-    setTimeout(function() {
-        window.location.href = 'http://localhost:3000'; // Replace with the desired URL
-    }, 3000); // Replace 2000 with the desired delay in milliseconds*/
     hourglass();
     hourglassInterval = setInterval(hourglass, 3000); //coloca o intervalo dentro da variavel
 }
@@ -36,10 +32,6 @@ function Login(){
     const password = document.loginForm.elements['password'].value;
     const meuid = localStorage.getItem('meuid');
     socket.emit("Login", username, email, password, meuid);
-    /*
-    setTimeout(function() {
-        window.location.href = 'http://localhost:3000'; // Replace with the desired URL
-    }, 3000); // Replace 2000 with the desired delay in milliseconds*/
     hourglass();
     hourglassInterval = setInterval(hourglass, 3000);
 }
@@ -100,13 +92,6 @@ socket.on('RegisterEvents', (msg) => {
     }
 });
 
-/*
-socket.on('TESTE', (msg) => {
-    console.log(msg);
-});*/
-
-// esse código abaixo roda na primeira vez que a página é carregada,
-// já mostrando o id do usuário que está no localStorage
 ver_meuid();
 
 IsLoggedIn();

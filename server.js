@@ -23,21 +23,9 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
-const originalConsoleLog = console.log;
-console.log = function(...args) {
-  const message = args[0];
-  const socket = args[1];
-  const socketEvent = args[2];
-
-  // Perform custom actions with the socket argument
-  if (typeof socket !== 'undefined') {
+function asyncEmit(message, socket, socketEvent){
     socket.emit(socketEvent, message);
-  }
-
-  // Call the original console.log() to output the log as usual
-  originalConsoleLog.apply(console, args);
-};
-
+}
 
 let activePlayers = {};
 let sessions = {};
@@ -91,15 +79,18 @@ io.on('connection', socket => {
             try {
                 const docRef = await addDoc(collection(db, "users"), data);
                 //console.log("Document written with ID: " + docRef.id);
-                console.log("SUCCESS",socket,"RegisterEvents");
+                asyncEmit("SUCCESS",socket,"RegisterEvents");
+                //console.log("SUCCESS",socket,"RegisterEvents");
                 //console.log("AAAAAAAAA", socket);
             } catch (e) {
                 //console.error("Error adding document: " + e);
-                console.log("PROBLEMA NO SISTEMA",socket,"RegisterEvents");
+                asyncEmit("PROBLEMA NO SISTEMA",socket,"RegisterEvents");
+                //console.log("PROBLEMA NO SISTEMA",socket,"RegisterEvents");
             }
         }
         else {
-            console.log("Email or username already registered",socket,"RegisterEvents");
+            asyncEmit("Email or username already registered",socket,"RegisterEvents");
+            //console.log("Email or username already registered");
         }
     });
 
@@ -113,12 +104,14 @@ io.on('connection', socket => {
             }
             sessions[session.sessionId] = session; //adiciona sessão com ID único
 
-            console.log("SUCCESS",socket,"LoginEvents");
+            //console.log("SUCCESS",socket,"LoginEvents");
+            asyncEmit("SUCCESS",socket,"LoginEvents");
             //io.emit('players', players);
             //socket.emit('Message', 'paravbens voce entrou'); NAO FUNCIONA
         }
         else {
-            console.log("INFORMAÇÕES ERRADAS",socket,"LoginEvents");
+            asyncEmit("INFORMAÇÕES ERRADAS",socket,"LoginEvents");
+            //console.log("INFORMAÇÕES ERRADAS",socket,"LoginEvents");
         }
     });
 
