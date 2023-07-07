@@ -40,8 +40,8 @@ function updateGraphics() {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw all players
-    context.fillStyle = playerColor;
-    context.fillRect(playerX, playerY, 20, 20);
+    //context.fillStyle = playerColor;
+    //context.fillRect(playerX, playerY, 20, 20);
     /*
     if (Object.keys(otherPlayers).length !== 0) {
         otherPlayers.forEach(player => {
@@ -73,12 +73,13 @@ function IsLoggedIn(){ //RODAR ASSIM QUE ENTRAR?
 }
 
 socket.on('UpdatingPlayerPositions', (newPosition, sessionId) => {
+    /*
     if (sessionId === localStorage.getItem('meuid')) {
         playerX = newPosition;
-    }
-    else{
+    }*/
+    //else{
         otherPlayers[sessionId].playerX = newPosition;
-    }
+    //}
 });
 
 //TROCA DE MENSAGENS-------------------------------------------------------------
@@ -92,19 +93,20 @@ function SendMessage(){
 socket.on('NewUserNotification', (msg, position, color, session) => {
     const mensagens = document.getElementById('mensagens');
     mensagens.innerHTML += `<p style="color: green">${msg}</p>`;
+    /*
     if (session.sessionId === localStorage.getItem('meuid')) { // ESSE CLIENTE ENTROU
         playerX = position;
         playerColor = color;
         playerUsername = session.username;
-    }
-    else{ // OUTRA PESSOA ENTROU
+    }*/
+    //else{ // OUTRA PESSOA ENTROU
         otherPlayers[session.sessionId] = {
             playerX: position,
             playerY: playerY,
             playerColor: color,
             username: session.username
         };
-    }
+    //}
 });
 
 socket.on('GetActivePlayers', (playerList) => {
