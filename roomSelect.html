@@ -32,13 +32,12 @@
 <body>
     <h1 id="userWelcome" style="text-align: center;">HI EREDNASYL!</h1>
     <h2 style="text-align: center;">Choose your room</h2>
-    <div id="roomList" style="text-align: center;">
-        <!--
-        <button class="btn">Room 1<span id="room1-ribbon" class="ribbon">1/6</span></button>
-        <br>
-        <br>-->
+    <div id="room-container" style="text-align: center;">
+        <!-- Novas salas aparecerão aqui -->
     </div>
     <div style="text-align: center;">
-        <button class="btn" style="background-color: blueviolet;"> Create new room!</button>
+        <button class="btn" id="create-room-btn" style="background-color: darkolivegreen;">Create New Room</button>
     </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./registerCliente.js"></script>
 </body>
