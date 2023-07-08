@@ -14,10 +14,10 @@ let otherPlayers = {};
 // Keyboard event listeners
 var keys = [];
 document.addEventListener("keydown", function (e) {
-keys[e.keyCode] = true;
+    keys[e.keyCode] = true;
 });
 document.addEventListener("keyup", function (e) {
-keys[e.keyCode] = false;
+    keys[e.keyCode] = false;
 });
 
 // Function to update the player's position
@@ -36,11 +36,13 @@ function updatePlayerPosition() {
 function updateGraphics() {
     // Clear the canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context.font = '16px Arial';
 
     // Draw all players
     for (let key in otherPlayers){
         if (otherPlayers.hasOwnProperty(key)) {
             context.fillStyle = otherPlayers[key].playerColor;
+            context.fillText(otherPlayers[key].username, otherPlayers[key].playerX - 20, otherPlayers[key].playerY - 20);
             context.fillRect(otherPlayers[key].playerX, otherPlayers[key].playerY, 20, 20);
         }
     }
