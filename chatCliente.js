@@ -73,10 +73,22 @@ function gameLoop() {
 //------------------------------------------------------------------------------
 
 function SetReady(){
-    const buttonText = document.getElementById('setReady').value;
+    let readyPlayers = {};
+    const buttonText = document.getElementById('setReady').innerText;
+    console.log(buttonText);
     const meuid = localStorage.getItem('meuid');
+
+    for (let key in otherPlayers){
+        if (otherPlayers.hasOwnProperty(key)) {
+            if (otherPlayers[key].isReady) {
+                readyPlayers[key] = otherPlayers[key];
+                //context.fillText('[READY!!!]', otherPlayers[key].playerX - 20, otherPlayers[key].playerY + 40);
+            }
+        }
+    }
     if (buttonText === 'START MATCH') {
-        socket.emit("StartMatch");
+        //roomPrefix, readyPlayers 
+        socket.emit("StartMatch", otherPlayers[meuid].room+'-match', readyPlayers);
     }
     else {
         socket.emit("SetPlayerReady", otherPlayers[meuid].room);
@@ -141,6 +153,10 @@ socket.on('Teste', (msg) => {
 socket.on('ChatRedirectLogin', (msg) => {
     isClientConnected = false;
     window.location.href = "http://localhost:3000";
+});
+
+socket.on('GameRedirect', () => {
+    window.location.href = "http://localhost:3000/piano.html";
 });
 
 socket.on('NewMessage', (msg) => {

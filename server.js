@@ -100,7 +100,7 @@ io.on('connection', socket => {
                 sessionId: sessionId,
                 username: username,
                 room: undefined,
-                playerInstances: 0
+                playerInstances: []
             }
             sessions[session.sessionId] = session; //adiciona sessão com ID único
 
@@ -191,7 +191,7 @@ io.on('connection', socket => {
             }
 
             activePlayers[socket.id] = player;
-            sessions[sessionId].playerInstances++;
+            sessions[sessionId].playerInstances.push(socket.id);
 
             rooms[playerRoom].activePlayers[player.socketId] = player;
             socket.join(playerRoom);
@@ -250,12 +250,25 @@ io.on('connection', socket => {
         const sessionId = activePlayers[socket.id].session.sessionId;
         const username = sessions[sessionId].username;
 
-        sessions[sessionId].playerInstances--;
+        const index = sessions[sessionId].playerInstances.indexOf(socket.id);
+        sessions[sessionId].playerInstances.splice(index,1);
+
         delete rooms['room'+roomNumber].activePlayers[socket.id];
         delete activePlayers[socket.id];
+        delete rooms['room'+roomNumber].players[sessionId];
 
-        if (sessions[sessionId].playerInstances === 0) {
+        if (sessions[sessionId].playerInstances.length === 0) {
             io.to('room'+roomNumber).emit('PlayerDisconnected', username + ' se desconectou.', sessionId);
+        }
+    });
+
+    socket.on('StartMatch', (roomPrefix, readyPlayers) => {
+        for (let key in readyPlayers){
+            if (readyPlayers.hasOwnProperty(key)) {
+                sessions[key].playerInstances.forEach(socketId => {
+                    io.to(socketId).emit('GameRedirect');
+                });
+            }
         }
     });
 
