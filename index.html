@@ -3,44 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login!</title>
+  <title>Login</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <!--https://www.w3schools.com/howto/howto_js_animate_icons.asp-->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 <body>
-    <i class='fas fa-crown'></i>
-    <form id="loginForm" name="loginForm" action="#" onsubmit="return false;">
-        <label for="username">Username login</label>
-        <input type="text" id="username" name="username">
-        <br>
+  <div class="header">
+    <h1>Piano Tiles</h1>
+    <p>Socket.io edition Σ>―(〃°ω°〃)♡→</p>
+  </div>
+  <form style="text-align: center; padding-top: 5%;" id="loginForm" name="loginForm" action="#" onsubmit="return false;">
+      <label for="username">Username:</label>
+      <input type="text" id="username" class="inputBox" name="username">
+      <br>
+      <br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" class="inputBox" name="password">
+      <br>
+      <br>
+      <input type="submit" value="Login" class="btn" onclick="Login()">
+  </form>
 
-        <label for="email">Email logn:</label>
-        <input type="email" id="email" name="email">
-        <br>
-
-        <label for="password">password lgoin:</label>
-        <input type="password" id="password" name="password">
-        <br>
-
-        <input type="submit" value="login" onclick="Login()">
-    </form>
-
-    <br>
-
-  ID: <span id="meuid">?</span><br/>
-  <button onclick="ver_meuid()">
-    Ver meu ID
-  </button>
-  <button onclick="alterar_meuid()">
-    Alterar meu ID
-  </button>
+  <br>
+  <br>
+  <div style="text-align: center;"><p>Doesn't have an account? </p> <a href="http://localhost:3000/register.html">Register!</a></div>
 
   <br>
 
-  <div id="div1" style="font-size: 200px;" class="fa"></div>
+  <div id="div1" style="font-size: 50px;" class="fa"></div>
 
-  <div id="messages"></div>
+  <div id="messages" style="text-align: center;"></div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="./cliente.js"></script>

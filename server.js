@@ -49,7 +49,7 @@ async function checkForUsernameAndEmail(username, email){
     return true;
 }
 
-async function checkForPassword(username, email, password){
+async function checkForPassword(username, password){
     const snapshot = await getDocs(collection(db, "users"));
     const usernames = snapshot.docs.map((doc) => doc.data().username);
     const passwords = snapshot.docs.map((doc) => doc.data().password);
@@ -92,8 +92,8 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('Login', async (username, email, password, sessionId) => {
-        const isLoginValid = await checkForPassword(username, email, password);
+    socket.on('Login', async (username, password, sessionId) => {
+        const isLoginValid = await checkForPassword(username, password);
         if (isLoginValid) {
             //A FUNÇÃO É PRA PEGAR UM "SESSIONID" E ADICIONAR ESSE SESSION ID NA LISTA DE PLAYERS ATIVOS NO SERVIDOR
             const session = {

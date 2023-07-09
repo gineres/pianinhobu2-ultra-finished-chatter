@@ -28,10 +28,9 @@ function Register(){
 
 function Login(){
     const username = document.loginForm.elements['username'].value;
-    const email = document.loginForm.elements['email'].value;
     const password = document.loginForm.elements['password'].value;
     const meuid = localStorage.getItem('meuid');
-    socket.emit("Login", username, email, password, meuid);
+    socket.emit("Login", username, password, meuid);
     hourglass();
     hourglassInterval = setInterval(hourglass, 3000);
 }
@@ -43,19 +42,21 @@ function IsLoggedIn(){ //RODAR ASSIM QUE ENTRAR?
     //alert("tá logado!!");
 }
 
-function ver_meuid() {
+function GenerateAndVisualizeId() {
     // obtendo id do localstorage (chave: 'meuid')
     const meuid = localStorage.getItem('meuid');
     if (meuid) {
-    // mostrando o id no span chamado "meuid"
-    meuIdSpan.innerText = meuid;
+        // mostrando o id no span chamado "meuid"
+        meuIdSpan.innerText = meuid;
+    }
+    else{
+        GenerateId(); // gera ID caso o jogador não tenha um
     }
 }
 
-function alterar_meuid() {
+function GenerateId() {
     // gera um id aleatório, para testes
     const novoId = crypto.randomUUID()
-
     // salva esse id no localStorage (chave: 'meuid')
     localStorage.setItem('meuid', novoId);
     // troca o id no span chamadao meuid
@@ -96,6 +97,6 @@ socket.on('RegisterEvents', (msg) => {
     }
 });
 
-ver_meuid();
+GenerateAndVisualizeId();
 
 IsLoggedIn();
