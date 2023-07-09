@@ -1,4 +1,6 @@
 const socket = io();
+const crownIcon = new Image();
+crownIcon.src = './Illustration14.png';
 
 //MOVIMENTAÇÃO E INTERAÇÃO--------------------------------------------------
 // Initialize the canvas and player variables
@@ -46,6 +48,9 @@ function updateGraphics() {
             context.fillStyle = otherPlayers[key].playerColor;
             context.fillText(otherPlayers[key].username, otherPlayers[key].playerX - 20, otherPlayers[key].playerY - 20);
             context.fillRect(otherPlayers[key].playerX, otherPlayers[key].playerY, 20, 20);
+            if (otherPlayers[key].isHost) {
+                context.drawImage(crownIcon, otherPlayers[key].playerX, otherPlayers[key].playerY - 60, 20, 20);
+            }
         }
     }
 }
@@ -58,6 +63,10 @@ function gameLoop() {
 }
 //------------------------------------------------------------------------------
 
+function SetReady(){
+    const meuid = localStorage.getItem('meuid');
+    socket.emit("SetPlayerReady", otherPlayers[meuid].room);
+}
 
 //Checa se o usuário tá logado, se sim, muda de página para a página de login
 function IsLoggedIn(){ //RODAR ASSIM QUE ENTRAR?
@@ -78,7 +87,7 @@ function SendMessage(){
     document.getElementById('messageInput').value = "";
 }
 
-socket.on('NewUserNotification', (msg, position, color, session) => {
+socket.on('NewUserNotification', (msg, position, color, session, isHost) => {
     const mensagens = document.getElementById('mensagens');
     mensagens.innerHTML += `<p style="color: green">${msg}</p>`;
     otherPlayers[session.sessionId] = {
@@ -86,7 +95,8 @@ socket.on('NewUserNotification', (msg, position, color, session) => {
         playerY: playerY,
         playerColor: color,
         username: session.username,
-        room: session.room
+        room: session.room,
+        isHost: isHost
     };
 });
 
@@ -100,7 +110,8 @@ socket.on('GetActivePlayers', (playerList) => {
                 playerY: playerY,
                 playerColor: playerList[key].color,
                 username: playerList[key].session.username,
-                room: playerList[key].session.room
+                room: playerList[key].session.room,
+                isHost: playerList[key].isHost
             }
         }
     }

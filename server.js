@@ -163,6 +163,7 @@ io.on('connection', socket => {
         let session = sessions[sessionId];
 
         if (session !== undefined) {
+            let isHost = false;
 
             console.log(rooms);
             //console.log('você está conectado!');
@@ -172,22 +173,27 @@ io.on('connection', socket => {
             //Solução 2: colocar todos os sockets de uma mesma sessão dentro de uma sala (com o ID da sessão), e todos os usuários dessa sala vão se comportar de maneiras idênticas, porque são o mesmo usuário
             //por enquanto, ignorar isso e fazer sockets individuais funcionarem
 
+            if (Object.keys(rooms[playerRoom].players).length === 1) {
+                isHost = true;
+            }
+
             const player = {
                 session: sessions[session.sessionId],
                 socketId: socket.id,
                 posX: 200,
-                color: "#"+Math.floor(Math.random()*16777215).toString(16) //Sorteando cor aleatória
+                color: "#"+Math.floor(Math.random()*16777215).toString(16), //Sorteando cor aleatória
+                isHost: isHost
             }
 
             rooms[playerRoom].activePlayers[player.socketId] = player;
             socket.join(playerRoom);
             //socket.emit('Chat first text');
             if (rooms[playerRoom].players[sessionId] === 'notify') {
-                io.to(playerRoom).emit('NewUserNotification', session.username + " just entered the room!", player.posX, player.color, player.session);
+                io.to(playerRoom).emit('NewUserNotification', session.username + " just entered the room!", player.posX, player.color, player.session, player.isHost);
                 rooms[playerRoom].players[sessionId] = 'dontNotify';
             }
             else{
-                io.to(playerRoom).emit('NewUserNotification', '', player.posX, player.color, player.session);
+                io.to(playerRoom).emit('NewUserNotification', '', player.posX, player.color, player.session, player.isHost);
             }
         }
 

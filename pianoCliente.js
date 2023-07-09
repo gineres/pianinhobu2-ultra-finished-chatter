@@ -15,6 +15,7 @@ var tiles = [];
 //const tileColors = ['#000000', '#000000', '#000000', '#000000'];
 const tileLetters = ['D', 'F', 'J', 'K'];
 let score = 0;
+let combo = 0;
 let tileId = 0;
 let tileIntervals = 1000;
 let maxTileIntervals = 150;
@@ -74,7 +75,7 @@ function moveTiles() {
         if (tile.y >= canvas.height) {
             if (tile.isActive) {
                 feedbackText = 'MISS!';
-                score=0;
+                combo=0;
             }
             tiles.shift();
         }
@@ -91,7 +92,8 @@ function checkCollision(keyCode) {
         if (tile.y >= canvas.height - tileHeight && tile.y <= canvas.height && tile.isActive) {
             feedbackText = 'HIT!';
             tile.isActive = false;
-            score++;
+            score+=Math.floor(combo*tileSpeed*50);
+            combo++;
         }
         return;
     }
@@ -99,8 +101,13 @@ function checkCollision(keyCode) {
 }
 
 function InvokeFeedback(){
-    ctx.font = '16px Arial';
-    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 24px Arial';
+    if (feedbackText === 'HIT!') {
+        ctx.fillStyle = 'green';
+    }
+    else {
+        ctx.fillStyle = 'red';
+    }
     ctx.fillText(feedbackText, 200, 300);
 }
 
@@ -108,6 +115,9 @@ function InvokeFeedback(){
 function updateScore() {
     const scoreElement = document.getElementById("score");
     scoreElement.innerHTML = `Score: <span id="score">${score}</span>`;
+    ctx.font = 'bold 30px Arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText('x'+combo, 10, 550);
     //document.body.appendChild(scoreElement);
 }
 
