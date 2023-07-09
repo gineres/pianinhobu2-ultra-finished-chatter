@@ -16,9 +16,15 @@ var tiles = [];
 const tileLetters = ['D', 'F', 'J', 'K'];
 let score = 0;
 let tileId = 0;
+let tileIntervals = 1000;
+let maxTileIntervals = 150;
+let tileSpeed = 5;
+let maxTileSpeed = 18;
+
+let feedbackText = '';
 
 // faz 1 tile novo por segundo
-var invokeTile = setInterval(makeNewTile, 1000);
+var invokeTile = setInterval(makeNewTile, tileIntervals);
 function makeNewTile(){
     var randomTile = Math.floor(Math.random() * 4);
     if (randomTile == 0) {
@@ -33,6 +39,14 @@ function makeNewTile(){
     else if (randomTile == 3) {
         tiles.push({ x: tileWidth * 3, y: -tileHeight, tileLetter: 'K', isActive: true });
     }
+    if (tileSpeed < maxTileSpeed) {
+        tileSpeed+=0.05;
+    }
+    if (tileIntervals > maxTileIntervals) { //DIMINUI O INTERVALO DE INVOCAR CADA TILE
+        tileIntervals -= 10;
+    }
+    clearInterval(invokeTile); // Clear the previous interval
+    invokeTile = setInterval(makeNewTile, tileIntervals); // Set new interval value
 }
 
 // Draw tiles on the canvas
@@ -56,14 +70,17 @@ function moveTiles() {
     setInterval(() => {
     for (let i = 0; i < tiles.length; i++) {
         const tile = tiles[i];
-        tile.y += 5;
+        tile.y += tileSpeed;
         if (tile.y >= canvas.height) {
-        tiles.shift();
-        //tile.y = -tileHeight;
-        //score--;
+            if (tile.isActive) {
+                feedbackText = 'MISS!';
+                score=0;
+            }
+            tiles.shift();
         }
     }
     }, 10);
+
 }
 
 // Check if player hit a tile
@@ -72,21 +89,19 @@ function checkCollision(keyCode) {
     tiles.forEach(tile => {
     if (tile.tileLetter == letter) {
         if (tile.y >= canvas.height - tileHeight && tile.y <= canvas.height && tile.isActive) {
+            feedbackText = 'HIT!';
             tile.isActive = false;
             score++;
         }
         return;
     }
     });
-    /*
-    const index = tileLetters.indexOf(letter);
-    if (index !== -1) {
-    const tile = tiles[index];
-    if (tile.y >= canvas.height - tileHeight && tile.y <= canvas.height) {
-        //tile.y = -tileHeight;
-        score++;
-    }
-    }*/
+}
+
+function InvokeFeedback(){
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#000000';
+    ctx.fillText(feedbackText, 200, 300);
 }
 
 // Update score
@@ -105,6 +120,7 @@ document.addEventListener('keydown', (event) => {
 function gameLoop() {
     drawTiles();
     updateScore();
+    InvokeFeedback();
     requestAnimationFrame(gameLoop);
 }
 
