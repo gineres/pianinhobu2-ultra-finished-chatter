@@ -22,13 +22,15 @@ document.addEventListener("keyup", function (e) {
 
 // Function to update the player's position
 function updatePlayerPosition() {
+    const meuid = localStorage.getItem('meuid');
+
     if (keys[37]) {
         // Left arrow key
-        socket.emit('LeftKeyPressed');
+        socket.emit('LeftKeyPressed', otherPlayers[meuid].room);
     }
     if (keys[39]) {
         // Right arrow key
-        socket.emit('RightKeyPressed');
+        socket.emit('RightKeyPressed', otherPlayers[meuid].room);
     }
 }
 
@@ -69,8 +71,9 @@ socket.on('UpdatingPlayerPositions', (newPosition, sessionId) => {
 
 //TROCA DE MENSAGENS-------------------------------------------------------------
 function SendMessage(){
+    const meuid = localStorage.getItem('meuid');
     const messageText = document.getElementById('messageInput').value;
-    socket.emit("SendMessage", messageText);
+    socket.emit("SendMessage", messageText, otherPlayers[meuid].room);
     console.log(messageText);
     document.getElementById('messageInput').value = "";
 }
@@ -82,7 +85,8 @@ socket.on('NewUserNotification', (msg, position, color, session) => {
         playerX: position,
         playerY: playerY,
         playerColor: color,
-        username: session.username
+        username: session.username,
+        room: session.room
     };
 });
 
@@ -95,7 +99,8 @@ socket.on('GetActivePlayers', (playerList) => {
                 playerX: playerList[key].posX,
                 playerY: playerY,
                 playerColor: playerList[key].color,
-                username: playerList[key].session.username
+                username: playerList[key].session.username,
+                room: playerList[key].session.room
             }
         }
     }

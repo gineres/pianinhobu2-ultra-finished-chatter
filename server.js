@@ -29,6 +29,7 @@ function asyncEmit(message, socket, socketEvent){
 
 let activePlayers = {};
 let sessions = {};
+let rooms = {};
 
 async function checkForUsernameAndEmail(username, email){
     const snapshot = await getDocs(collection(db, "users"));
@@ -69,7 +70,7 @@ async function checkForPassword(username, email, password){
 app.use(express.static(path.join(__dirname, '.')));
 
 io.on('connection', socket => {
-    console.log('SOCKET NOVO NA AREA');
+    console.log('New socket connection!');
 
     // AUTHENTICATION
     socket.on('Register', async (username, email, password) => {
@@ -78,19 +79,15 @@ io.on('connection', socket => {
             const data = {username: username, email: email, password: password};
             try {
                 const docRef = await addDoc(collection(db, "users"), data);
-                //console.log("Document written with ID: " + docRef.id);
+                console.log("Document written with ID: " + docRef.id);
                 asyncEmit("SUCCESS",socket,"RegisterEvents");
-                //console.log("SUCCESS",socket,"RegisterEvents");
-                //console.log("AAAAAAAAA", socket);
             } catch (e) {
-                //console.error("Error adding document: " + e);
+                console.error("Error adding document: " + e);
                 asyncEmit("PROBLEMA NO SISTEMA",socket,"RegisterEvents");
-                //console.log("PROBLEMA NO SISTEMA",socket,"RegisterEvents");
             }
         }
         else {
             asyncEmit("Email or username already registered",socket,"RegisterEvents");
-            //console.log("Email or username already registered");
         }
     });
 
@@ -100,7 +97,8 @@ io.on('connection', socket => {
             //A FUNÇÃO É PRA PEGAR UM "SESSIONID" E ADICIONAR ESSE SESSION ID NA LISTA DE PLAYERS ATIVOS NO SERVIDOR
             const session = {
                 sessionId: sessionId,
-                username: username
+                username: username,
+                room: undefined
             }
             sessions[session.sessionId] = session; //adiciona sessão com ID único
 
@@ -115,17 +113,49 @@ io.on('connection', socket => {
         }
     });
 
+    // Checando sessão na tela de login
     socket.on('CheckSession', (sessionId) => {
-        console.log('checando sessão...');
+        console.log('Checando sessão...');
         let session = sessions[sessionId];
 
         if (session !== undefined) {
-            console.log('você está conectado!');
-            socket.emit('ChatRedirect', 'Você entrou na sala!');
+            console.log('Usuário está conectado!');
+            socket.emit('SelectRoomRedirect');
+            //socket.emit('ChatRedirect');
         }
         else{
-            console.log('do nothing');
+            console.log('Usuário não conectado.');
         }
+    });
+
+    //ROOM SELECT
+    socket.on('CreateAndEnterRoom', (roomCount, sessionId) => {
+        rooms['room'+roomCount] = {
+            players: {},
+            activePlayers: {}
+        };
+        rooms['room'+roomCount].players[sessionId] = 'notify'; //o usuário é novo!
+        sessions[sessionId].room = roomCount;
+        socket.emit('ChatRedirect', rooms['room'+roomCount].players[sessionId]);
+        //socket.join("room"+roomCount); NÃO FUNCIONA PQ VAI MUDAR DE URL
+    });
+
+    socket.on('EnterRoom', (roomNumber, sessionId) => {
+        console.log('......'+roomNumber+'.........');
+        if (rooms['room'+roomNumber].players[sessionId] !== undefined) {
+            rooms['room'+roomNumber].players[sessionId] = 'dontNotify';  //o usuário tá com mais de uma aba aberta, não precisa notificar a entrada dele de novo
+            socket.emit('ChatRedirect', rooms['room'+roomNumber].players[sessionId]); //preciso fazer essa mesma coisa na checagem de conexão, o ideal é q se a pessoa tiver
+            //conectada ela nem tenha a possibilidade de estar na pagina de room selection
+        }
+        else{
+            rooms['room'+roomNumber].players[sessionId] = 'notify';  //o usuário é novo!
+            sessions[sessionId].room = roomNumber;
+            socket.emit('ChatRedirect', rooms['room'+roomNumber].players[sessionId]);
+        }
+    });
+
+    socket.on('CheckRooms', () =>{
+        socket.emit('UpdateRooms', rooms);
     });
 
     //CHAT - LOBBY
@@ -133,8 +163,11 @@ io.on('connection', socket => {
         let session = sessions[sessionId];
 
         if (session !== undefined) {
+
+            console.log(rooms);
             //console.log('você está conectado!');
-            socket.emit('GetActivePlayers', activePlayers);
+            const playerRoom = 'room'+sessions[sessionId].room;
+            socket.emit('GetActivePlayers', rooms[playerRoom].activePlayers);
             //checar se já tem outro socket ativo com a mesma sessão, se sim, usar socket.disconnect() nele e copiar as informações de cor e posição pra o novo socket
             //Solução 2: colocar todos os sockets de uma mesma sessão dentro de uma sala (com o ID da sessão), e todos os usuários dessa sala vão se comportar de maneiras idênticas, porque são o mesmo usuário
             //por enquanto, ignorar isso e fazer sockets individuais funcionarem
@@ -146,9 +179,16 @@ io.on('connection', socket => {
                 color: "#"+Math.floor(Math.random()*16777215).toString(16) //Sorteando cor aleatória
             }
 
-            activePlayers[player.socketId] = player;
+            rooms[playerRoom].activePlayers[player.socketId] = player;
+            socket.join(playerRoom);
             //socket.emit('Chat first text');
-            io.emit('NewUserNotification', session.username + " just entered the room!", player.posX, player.color, player.session);
+            if (rooms[playerRoom].players[sessionId] === 'notify') {
+                io.to(playerRoom).emit('NewUserNotification', session.username + " just entered the room!", player.posX, player.color, player.session);
+                rooms[playerRoom].players[sessionId] = 'dontNotify';
+            }
+            else{
+                io.to(playerRoom).emit('NewUserNotification', '', player.posX, player.color, player.session);
+            }
         }
 
         else{
@@ -157,24 +197,27 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('SendMessage', (msg) => {
+    socket.on('SendMessage', (msg, room) => {
+        //console.log(socket.rooms.has("room1"));
         //filtrar se o texto tem "to [username]: antes, se sim, envia mensagem privada, se não, envia msg global"
-        const remetente = activePlayers[socket.id].session.username;
+        //const remetente = activePlayers[socket.id].session.username;
+
+        const remetente = rooms['room'+room].activePlayers[socket.id].session.username;
         const formattedText = `${remetente}: ${msg}`;
-        io.emit('NewMessage', formattedText);
+        io.to('room'+room).emit('NewMessage', formattedText);
     });
 
     
-    socket.on('LeftKeyPressed', () => {
-        const user = activePlayers[socket.id];
+    socket.on('LeftKeyPressed', (room) => {
+        const user = rooms['room'+room].activePlayers[socket.id];
         user.posX -= 5;
-        io.emit('UpdatingPlayerPositions', user.posX, user.session.sessionId);
+        io.to('room'+room).emit('UpdatingPlayerPositions', user.posX, user.session.sessionId);
     });
 
-    socket.on('RightKeyPressed', () => {
-        const user = activePlayers[socket.id];
+    socket.on('RightKeyPressed', (room) => {
+        const user = rooms['room'+room].activePlayers[socket.id];
         user.posX += 5;
-        io.emit('UpdatingPlayerPositions', user.posX, user.session.sessionId);
+        io.to('room'+room).emit('UpdatingPlayerPositions', user.posX, user.session.sessionId);
     });
 
     //GAME

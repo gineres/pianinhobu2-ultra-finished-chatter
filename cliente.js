@@ -62,15 +62,19 @@ function alterar_meuid() {
     meuIdSpan.innerText = novoId;
 }
 
-socket.on('ChatRedirect', (msg) => {
+socket.on('ChatRedirect', () => {
     window.location.href = "http://localhost:3000/chat.html";
 });
 
+socket.on('SelectRoomRedirect', () => {
+    window.location.href = "http://localhost:3000/roomSelect.html";
+});
+
 socket.on('LoginEvents', (msg) => {
-    if (msg === 'SUCCESS') { //SE O LOGIN DER CERTO, VAI PRO CHAT
-        window.location.href = "http://localhost:3000/chat.html";
+    if (msg === 'SUCCESS') { //SE O LOGIN DER CERTO, VAI PRA SELEÇÃO DE SALAS
+        window.location.href = "http://localhost:3000/roomSelect.html";
     }
-    else { // SE NAO MOSTRA O ERORO
+    else { // SE NAO, EXIBE ERRO
         const messages = document.getElementById('messages');
         messages.innerHTML += `<p style="color: red">${msg}</p>`;
         clearInterval(hourglassInterval);
