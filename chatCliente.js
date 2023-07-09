@@ -13,6 +13,8 @@ let playerColor;
 let playerUsername;
 let otherPlayers = {};
 
+let isClientConnected = true;
+
 // Keyboard event listeners
 var keys = [];
 document.addEventListener("keydown", function (e) {
@@ -38,6 +40,7 @@ function updatePlayerPosition() {
 
 // Function to update the graphics
 function updateGraphics() {
+    const meuid = localStorage.getItem('meuid');
     // Clear the canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.font = '16px Arial';
@@ -50,6 +53,12 @@ function updateGraphics() {
             context.fillRect(otherPlayers[key].playerX, otherPlayers[key].playerY, 20, 20);
             if (otherPlayers[key].isHost) {
                 context.drawImage(crownIcon, otherPlayers[key].playerX, otherPlayers[key].playerY - 60, 20, 20);
+                if (key === meuid) {
+                    document.getElementById('setReady').innerHTML = `START MATCH`;
+                }
+            }
+            if (otherPlayers[key].isReady && !(otherPlayers[key].isHost)) {
+                context.fillText('[READY!!!]', otherPlayers[key].playerX - 20, otherPlayers[key].playerY + 40);
             }
         }
     }
@@ -64,8 +73,14 @@ function gameLoop() {
 //------------------------------------------------------------------------------
 
 function SetReady(){
+    const buttonText = document.getElementById('setReady').value;
     const meuid = localStorage.getItem('meuid');
-    socket.emit("SetPlayerReady", otherPlayers[meuid].room);
+    if (buttonText === 'START MATCH') {
+        socket.emit("StartMatch");
+    }
+    else {
+        socket.emit("SetPlayerReady", otherPlayers[meuid].room);
+    }
 }
 
 //Checa se o usuário tá logado, se sim, muda de página para a página de login
@@ -87,7 +102,7 @@ function SendMessage(){
     document.getElementById('messageInput').value = "";
 }
 
-socket.on('NewUserNotification', (msg, position, color, session, isHost) => {
+socket.on('NewUserNotification', (msg, position, color, session, isHost, isReady) => {
     const mensagens = document.getElementById('mensagens');
     mensagens.innerHTML += `<p style="color: green">${msg}</p>`;
     otherPlayers[session.sessionId] = {
@@ -96,7 +111,8 @@ socket.on('NewUserNotification', (msg, position, color, session, isHost) => {
         playerColor: color,
         username: session.username,
         room: session.room,
-        isHost: isHost
+        isHost: isHost,
+        isReady: isReady
     };
 });
 
@@ -111,7 +127,8 @@ socket.on('GetActivePlayers', (playerList) => {
                 playerColor: playerList[key].color,
                 username: playerList[key].session.username,
                 room: playerList[key].session.room,
-                isHost: playerList[key].isHost
+                isHost: playerList[key].isHost,
+                isReady: playerList[key].isReady
             }
         }
     }
@@ -122,6 +139,7 @@ socket.on('Teste', (msg) => {
 });
 
 socket.on('ChatRedirectLogin', (msg) => {
+    isClientConnected = false;
     window.location.href = "http://localhost:3000";
 });
 
@@ -129,7 +147,29 @@ socket.on('NewMessage', (msg) => {
     const mensagens = document.getElementById('mensagens');
     mensagens.innerHTML += `<p style="color: green">${msg}</p>`;
 });
+
+socket.on('UpdatePlayerReadyStatus', (isReady, sessionId) =>{
+    otherPlayers[sessionId].isReady = isReady;
+});
+
+socket.on('PlayerDisconnected', (msg, sessionId) => {
+    //console.log(msg);
+    const mensagens = document.getElementById('mensagens');
+    mensagens.innerHTML += `<p style="color: green">${msg}</p>`;
+    delete otherPlayers[sessionId];
+});
 //---------------------------------------------------------------------------------
+
+window.addEventListener('beforeunload', function(event) {
+    if (isClientConnected) {
+        socket.emit('DisconnectFromChat');
+    }
+    
+    // Perform your desired action here
+    // This message will be ignored by most modern browsers, but it can be used to display a confirmation dialog
+    //event.returnValue = 'Are you sure you want to leave this page?';
+});
+  
 
 
 //Start the game loop

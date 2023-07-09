@@ -30,6 +30,7 @@ function asyncEmit(message, socket, socketEvent){
 let activePlayers = {};
 let sessions = {};
 let rooms = {};
+let matches = {};
 
 async function checkForUsernameAndEmail(username, email){
     const snapshot = await getDocs(collection(db, "users"));
@@ -98,7 +99,8 @@ io.on('connection', socket => {
             const session = {
                 sessionId: sessionId,
                 username: username,
-                room: undefined
+                room: undefined,
+                playerInstances: 0
             }
             sessions[session.sessionId] = session; //adiciona sessão com ID único
 
@@ -164,6 +166,7 @@ io.on('connection', socket => {
 
         if (session !== undefined) {
             let isHost = false;
+            let isReady = false;
 
             console.log(rooms);
             //console.log('você está conectado!');
@@ -175,6 +178,7 @@ io.on('connection', socket => {
 
             if (Object.keys(rooms[playerRoom].players).length === 1) {
                 isHost = true;
+                isReady = true;
             }
 
             const player = {
@@ -182,18 +186,22 @@ io.on('connection', socket => {
                 socketId: socket.id,
                 posX: 200,
                 color: "#"+Math.floor(Math.random()*16777215).toString(16), //Sorteando cor aleatória
-                isHost: isHost
+                isHost: isHost,
+                isReady: isReady
             }
+
+            activePlayers[socket.id] = player;
+            sessions[sessionId].playerInstances++;
 
             rooms[playerRoom].activePlayers[player.socketId] = player;
             socket.join(playerRoom);
             //socket.emit('Chat first text');
             if (rooms[playerRoom].players[sessionId] === 'notify') {
-                io.to(playerRoom).emit('NewUserNotification', session.username + " just entered the room!", player.posX, player.color, player.session, player.isHost);
+                io.to(playerRoom).emit('NewUserNotification', session.username + " just entered the room!", player.posX, player.color, player.session, player.isHost, player.isReady);
                 rooms[playerRoom].players[sessionId] = 'dontNotify';
             }
             else{
-                io.to(playerRoom).emit('NewUserNotification', '', player.posX, player.color, player.session, player.isHost);
+                io.to(playerRoom).emit('NewUserNotification', '', player.posX, player.color, player.session, player.isHost, player.isReady);
             }
         }
 
@@ -224,6 +232,31 @@ io.on('connection', socket => {
         const user = rooms['room'+room].activePlayers[socket.id];
         user.posX += 5;
         io.to('room'+room).emit('UpdatingPlayerPositions', user.posX, user.session.sessionId);
+    });
+
+    socket.on('SetPlayerReady', (room) =>{
+        const user = rooms['room'+room].activePlayers[socket.id];
+        if (user.isReady) {
+            user.isReady = false;
+        }
+        else {
+            user.isReady = true;
+        }
+        io.to('room'+room).emit('UpdatePlayerReadyStatus', user.isReady, user.session.sessionId);
+    });
+
+    socket.on('DisconnectFromChat', () => {
+        const roomNumber = activePlayers[socket.id].session.room;
+        const sessionId = activePlayers[socket.id].session.sessionId;
+        const username = sessions[sessionId].username;
+
+        sessions[sessionId].playerInstances--;
+        delete rooms['room'+roomNumber].activePlayers[socket.id];
+        delete activePlayers[socket.id];
+
+        if (sessions[sessionId].playerInstances === 0) {
+            io.to('room'+roomNumber).emit('PlayerDisconnected', username + ' se desconectou.', sessionId);
+        }
     });
 
     //GAME
