@@ -17,15 +17,18 @@
     <canvas id="gameCanvas" width="400" height="600"></canvas>
   </div>
   <div style="display: flex;">
-    <div class="square" style="background-color: brown; text-align: center;">D</div>
-    <div class="square" style="background-color: rgb(172, 90, 8); text-align: center;">F</div>
-    <div class="square" style="background-color: rgb(67, 116, 32); text-align: center;">J</div>
-    <div class="square" style="background-color: rgb(41, 84, 119); text-align: center;">K</div>
+    <div id="buttonD" class="square" style="background-color: brown; text-align: center;">D</div>
+    <div id="buttonF" class="square" style="background-color: rgb(172, 90, 8); text-align: center;">F</div>
+    <div id="buttonJ" class="square" style="background-color: rgb(67, 116, 32); text-align: center;">J</div>
+    <div id="buttonK" class="square" style="background-color: rgb(41, 84, 119); text-align: center;">K</div>
   </div>
-  <span id="playersRanking" style="position: absolute; top: 20%; left: 30%; transform: translate(-50%, -50%);">
+  <span id="playersRanking" style="position: absolute; top: 25%; left: 30%; transform: translate(-50%, -50%);">
     <p class="rankingSlot">FULANO 30000</p>
     <p class="rankingSlot" style="background-color: blueviolet;">FULANO 20000</p>
     <p class="rankingSlot" style="background-color: cornflowerblue;">FULANO 10000</p>
+    <p class="rankingSlot" style="background-color: blueviolet;">FULANO 5000</p>
+    <p class="rankingSlot" style="background-color: cornflowerblue;">FULANO 300</p>
+    <p class="rankingSlot" style="background-color: blueviolet;">FULANO 0</p>
   </span>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./pianoCliente.js"></script>

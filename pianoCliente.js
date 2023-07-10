@@ -124,6 +124,33 @@ function updateScore() {
 // Handle keydown event
 document.addEventListener('keydown', (event) => {
     checkCollision(event.keyCode);
+    if (String.fromCharCode(event.keyCode) === 'D') {
+        document.getElementById('buttonD').style.backgroundColor = 'red';
+    }
+    if (String.fromCharCode(event.keyCode) === 'F') {
+        document.getElementById('buttonF').style.backgroundColor = 'orange';
+    }
+    if (String.fromCharCode(event.keyCode) === 'J') {
+        document.getElementById('buttonJ').style.backgroundColor = '#32CD32';
+    }
+    if (String.fromCharCode(event.keyCode) === 'K') {
+        document.getElementById('buttonK').style.backgroundColor = '#1F51FF';
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    if (String.fromCharCode(event.keyCode) === 'D') {
+        document.getElementById('buttonD').style.backgroundColor = 'brown'; // Set the original background color
+    }
+    if (String.fromCharCode(event.keyCode) === 'F') {
+        document.getElementById('buttonF').style.backgroundColor = 'rgb(172, 90, 8)'; // Set the original background color
+    }
+    if (String.fromCharCode(event.keyCode) === 'J') {
+        document.getElementById('buttonJ').style.backgroundColor = 'rgb(67, 116, 32)'; // Set the original background color
+    }
+    if (String.fromCharCode(event.keyCode) === 'K') {
+        document.getElementById('buttonK').style.backgroundColor = 'rgb(41, 84, 119)'; // Set the original background color
+    }
 });
 
 // Game loop
