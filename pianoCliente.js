@@ -18,7 +18,7 @@ let maxTileSpeed = 18;
 let feedbackText = '';
 
 // faz 1 tile novo por segundo
-var invokeTile = setInterval(makeNewTile, tileIntervals);
+var invokeTile;
 
 let chart;
 let currentChartIndex = 0;
@@ -26,6 +26,16 @@ let currentChartIndex = 0;
 socket.on('GetChart', (receivedChart) => {
     chart = receivedChart;
     console.log('O CHART CHEGOU' + chart);
+    socket.emit('ChartReceived', meuid, window.location.href);
+});
+
+socket.on('StartGame', (shouldStart) => {
+    if (shouldStart) {
+        invokeTile = setInterval(makeNewTile, tileIntervals);
+    }
+    else{
+        console.log('waiting for players');
+    }
 });
 
 function makeNewTile(){

@@ -272,10 +272,12 @@ io.on('connection', socket => {
             if (readyPlayers.hasOwnProperty(key)) {
                 sessions[key].playerInstances.forEach(socketId => {
                     matches[matchPrefix].players[key] = {
+                        username: sessions[key].username,
                         score: 0,
                         combo: 0,
                         sockets: [],
-                        chartFinished: false
+                        chartFinished: false,
+                        chartReceived: false
                     }
                     io.to(socketId).emit('GameRedirect', matchPrefix);
                 });
@@ -287,8 +289,6 @@ io.on('connection', socket => {
     socket.on('CheckPianoConnection', (sessionId, matchUrl) => {
         const matchId = matchUrl.substring(matchUrl.indexOf('#') + 1);
 
-        console.log('TAMANHO DO CHART:' + matches[matchId].chart.length);
-
         // gera o chart uma única vez
         if (matches[matchId].chart.length === 0) {
             // gerar o chart
@@ -298,11 +298,12 @@ io.on('connection', socket => {
             }
         }
 
-        console.log('CHART DEPOIS DA MACUMBA: '+ matches[matchId].chart);
-
         if (matches[matchId].players[sessionId]) {
             matches[matchId].players[sessionId].sockets.push(socket.id);
             socket.emit('GetChart', matches[matchId].chart);
+            socket.join(matchId);
+            socket.emit('GetPlayers', matches[matchId].players);
+            //io.to(matchId).emit('UpdatePresentPlayers');
             // CONNECT PLAYER AND PROVIDE HIM THE FINITE CHART
             // PROVIDE LIST OF PLAYERS AND ETC EVERYTIME SOMEONE CONNECTS (TO THE ROOM)
             // ADD PLAYERS TO THE ROOM TO BE ABLE TO PROVIDE SCORES AND STUFF
@@ -311,12 +312,43 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('OnChartFinished', (sessionId, matchUrl) => {
-        const matchId = matchUrl.substring(url.indexOf('#') + 1);
+    socket.on('ChartFinished', (sessionId, matchUrl) => {
+        const matchId = matchUrl.substring(matchUrl.indexOf('#') + 1);
         if (matches[matchId].players[sessionId]) {
             matches[matchId].players[sessionId].chartFinished = true;
         }
+        
+
         //Check if all players in the match finished the chart, while not, other players are left waiting for until 30 seconds
+        //if yes, send a signal to all players in the room to show the final results
+    });
+
+    socket.on('ChartReceived', (sessionId, matchUrl) => {
+        let allChartsReceived = true;
+        const matchId = matchUrl.substring(matchUrl.indexOf('#') + 1);
+        if (matches[matchId].players[sessionId]) {
+            matches[matchId].players[sessionId].chartReceived = true;
+        }
+
+        for (let key in matches[matchId].players){
+            if (matches[matchId].players.hasOwnProperty(key)) {
+                if (!(matches[matchId].players[key].chartReceived)) {
+                    allChartsReceived = false;
+                    break;
+                }
+            }
+        }
+
+        if (allChartsReceived) {
+            io.to(matchId).emit('StartGame', true); //'waiting for players'
+        } else {
+            io.to(matchId).emit('StartGame', false);
+        }
+
+        console.log();
+
+        //Check if all players in the match received the chart, while not, other players are left waiting for until 30 seconds
+        //if yes, send a signal to all players in the room to start the game
     });
 
     socket.on('GameEvent', (sessionId, matchUrl, score, combo) => {
