@@ -10,33 +10,24 @@
       body {
         background-color: black;
       }
-      .btn {
-        border: none;
-        border-radius: 5px;
-        padding: 12px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        background-color: #282A35;
-        color: white;
-        position: relative;
-      }
     </style>
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div style="text-align: center;">
       <button id="setReady" class="btn" style="background-color: darkgreen;" onclick="SetReady()">SET READY</button>
     </div>
 
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"><canvas id="gameCanvas" width="800" height="400"></canvas></div>
+    <div style="position: absolute; top: 53%; left: 50%; transform: translate(-50%, -50%);"><canvas id="gameCanvas" width="800" height="600"></canvas></div>
 
     <!-- CHAT AREA -->
-    <h1 style="color: skyblue">MENSAGENS:</h1>
-    <div id="mensagens" style="height:550px;width:200px;overflow:auto;background-color:rgb(58, 60, 52);color:white;scrollbar-base-color:gold;font-family:sans-serif;padding:10px;">
+    <h2 style="color: rgb(201, 16, 84)">CHAT:</h1>
+    <div id="mensagens" style="height:550px;width:210px;overflow:auto;background-color:rgb(36, 26, 47);color:white;scrollbar-base-color:gold;font-family:sans-serif;padding:10px;">
     </div>
 
     <form id="messageForm" name="messageForm" action="#" onsubmit="return false;">
-      <input type="text" id="messageInput" name="messageInput">
-      <input type="submit" value="SEND" onclick="SendMessage()">
+      <input type="text" id="messageInput" name="messageInput" class="inputBox" style="width: 10%; background-color:rgb(255, 240, 249);">
+      <input type="submit" value="SEND" class="btn" style="background-color: rgb(174, 51, 69);" onclick="SendMessage()">
     </form>
     <!---->
 

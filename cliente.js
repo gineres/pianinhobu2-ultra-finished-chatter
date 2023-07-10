@@ -47,7 +47,7 @@ function GenerateAndVisualizeId() {
     const meuid = localStorage.getItem('meuid');
     if (meuid) {
         // mostrando o id no span chamado "meuid"
-        meuIdSpan.innerText = meuid;
+        //meuIdSpan.innerText = meuid;
     }
     else{
         GenerateId(); // gera ID caso o jogador não tenha um

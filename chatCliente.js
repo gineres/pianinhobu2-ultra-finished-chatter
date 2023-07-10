@@ -87,7 +87,7 @@ function SetReady(){
         }
     }
     if (buttonText === 'START MATCH') {
-        //roomPrefix, readyPlayers 
+        //matchPrefix, readyPlayers 
         socket.emit("StartMatch", otherPlayers[meuid].room+'-match', readyPlayers);
     }
     else {

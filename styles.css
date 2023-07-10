@@ -43,3 +43,20 @@ body {
     color: white;
     font-size: 24px;
 }
+
+.rankingSlot {
+    background-color: brown;
+    color: white;
+    padding: 3px;
+}
+
+.square {
+    height: 50px;
+    width: 100px;
+    background-color: #555;
+    color: white;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

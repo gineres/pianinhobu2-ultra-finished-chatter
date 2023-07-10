@@ -262,10 +262,20 @@ io.on('connection', socket => {
         }
     });
 
-    socket.on('StartMatch', (roomPrefix, readyPlayers) => {
+    socket.on('StartMatch', (matchPrefix, readyPlayers) => {
+        matches[matchPrefix] = {
+            players: {},
+            chart: []
+        };
+
         for (let key in readyPlayers){
             if (readyPlayers.hasOwnProperty(key)) {
                 sessions[key].playerInstances.forEach(socketId => {
+                    matches[matchPrefix].players[key] = {
+                        score: 0,
+                        combo: 0,
+                        sockets: []
+                    }
                     io.to(socketId).emit('GameRedirect');
                 });
             }

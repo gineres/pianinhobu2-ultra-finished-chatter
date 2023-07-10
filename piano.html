@@ -4,26 +4,28 @@
   <title>Piano Tiles Clone</title>
   <style>
     canvas {
-      border: 1px solid #000;
+      border: 2px solid #ff7a7a;
     }
   </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div>
-    <p id = "score"> Score: 0</p>
+    <h2 id = "score"> Score: 0</h2>
   </div>
-  <canvas id="gameCanvas" width="400" height="600" style="display: inline-block;"></canvas>
-  <span id="playersRanking" style="display: inline-block;">
-    <p>FULANO 10000</p>
-    <p>FULANO 30000</p>
-    <p>FULANO 10000</p>
-    <p>FULANO 30000</p>
-    <p>FULANO 10000</p>
-    <p>FULANO 30000</p>
-    <p>FULANO 10000</p>
-    <p>FULANO 30000</p>
-    <p>FULANO 10000</p>
-    <p>FULANO 30000</p>
+  <div style="text-align: center; display: flex;">
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+  </div>
+  <div style="display: flex;">
+    <div class="square" style="background-color: brown; text-align: center;">D</div>
+    <div class="square" style="background-color: rgb(172, 90, 8); text-align: center;">F</div>
+    <div class="square" style="background-color: rgb(67, 116, 32); text-align: center;">J</div>
+    <div class="square" style="background-color: rgb(41, 84, 119); text-align: center;">K</div>
+  </div>
+  <span id="playersRanking" style="position: absolute; top: 20%; left: 30%; transform: translate(-50%, -50%);">
+    <p class="rankingSlot">FULANO 30000</p>
+    <p class="rankingSlot" style="background-color: blueviolet;">FULANO 20000</p>
+    <p class="rankingSlot" style="background-color: cornflowerblue;">FULANO 10000</p>
   </span>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./pianoCliente.js"></script>
