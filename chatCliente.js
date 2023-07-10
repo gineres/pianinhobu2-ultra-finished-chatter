@@ -155,8 +155,8 @@ socket.on('ChatRedirectLogin', (msg) => {
     window.location.href = "http://localhost:3000";
 });
 
-socket.on('GameRedirect', () => {
-    window.location.href = "http://localhost:3000/piano.html";
+socket.on('GameRedirect', (matchPrefix) => {
+    window.location.href = `http://localhost:3000/piano.html#${matchPrefix}`;
 });
 
 socket.on('NewMessage', (msg) => {

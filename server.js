@@ -274,15 +274,38 @@ io.on('connection', socket => {
                     matches[matchPrefix].players[key] = {
                         score: 0,
                         combo: 0,
-                        sockets: []
+                        sockets: [],
+                        chartFinished: false
                     }
-                    io.to(socketId).emit('GameRedirect');
+                    io.to(socketId).emit('GameRedirect', matchPrefix);
                 });
             }
         }
     });
 
     //GAME
+    socket.on('CheckPianoConnection', (sessionId, matchUrl) => {
+        const matchId = matchUrl.substring(url.indexOf('#') + 1);
+        if (matches[matchId].players[sessionId]) {
+            matches[matchId].players[sessionId].sockets.push(socket.id);
+            // CONNECT PLAYER AND PROVIDE HIM THE FINITE CHART
+            // ADD PLAYERS TO THE ROOM TO BE ABLE TO PROVIDE SCORES AND STUFF
+        } else {
+            // Kick the user
+        }
+    });
+
+    socket.on('OnChartFinished', (sessionId, matchUrl) => {
+        const matchId = matchUrl.substring(url.indexOf('#') + 1);
+        if (matches[matchId].players[sessionId]) {
+            matches[matchId].players[sessionId].chartFinished = true;
+        }
+        //Check if all players in the match finished the chart, while not, other players are left waiting for until 30 seconds
+    });
+
+    socket.on('GameEvent', (sessionId, matchUrl, score, combo) => {
+        //
+    });
 });
 
 const PORT = 3000;

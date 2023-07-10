@@ -3,16 +3,9 @@ const ctx = canvas.getContext('2d');
 const tileWidth = 100;
 const tileHeight = 150;
 const socket = io();
+const meuid = localStorage.getItem('meuid');
 
 var tiles = [];
-
-/*
-{ x: 0, y: -tileHeight },
-{ x: tileWidth, y: -tileHeight },
-{ x: tileWidth * 2, y: -tileHeight },
-{ x: tileWidth * 3, y: -tileHeight }*/
-
-//const tileColors = ['#000000', '#000000', '#000000', '#000000'];
 const tileLetters = ['D', 'F', 'J', 'K'];
 let score = 0;
 let combo = 0;
@@ -55,14 +48,14 @@ function drawTiles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < tiles.length; i++) {
-    const tile = tiles[i];
-    if (tile.isActive) {
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(tile.x, tile.y, tileWidth, tileHeight);
-    }
-    //ctx.fillStyle = '#000';
-    //ctx.font = 'bold 24px Arial';
-    //ctx.fillText(tileLetters[i], tile.x + tileWidth / 2 - 10, tile.y + tileHeight / 2 + 10);
+        const tile = tiles[i];
+        if (tile.isActive) {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(tile.x, tile.y, tileWidth, tileHeight);
+        }
+        //ctx.fillStyle = '#000';
+        //ctx.font = 'bold 24px Arial';
+        //ctx.fillText(tileLetters[i], tile.x + tileWidth / 2 - 10, tile.y + tileHeight / 2 + 10);
     }
 }
 
@@ -161,5 +154,10 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+function CheckGameConnection(){
+    socket.emit('CheckPianoConnection', meuid, window.location.href);
+}
+
 moveTiles();
 gameLoop();
+CheckGameConnection();
