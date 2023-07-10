@@ -19,8 +19,19 @@ let feedbackText = '';
 
 // faz 1 tile novo por segundo
 var invokeTile = setInterval(makeNewTile, tileIntervals);
+
+let chart;
+let currentChartIndex = 0;
+
+socket.on('GetChart', (receivedChart) => {
+    chart = receivedChart;
+    console.log('O CHART CHEGOU' + chart);
+});
+
 function makeNewTile(){
-    var randomTile = Math.floor(Math.random() * 4);
+    //console.log(chart);
+
+    var randomTile = chart[currentChartIndex];
     if (randomTile == 0) {
         tiles.push({ x: 0, y: -tileHeight, tileLetter: 'D', isActive: true });
     }
@@ -41,6 +52,7 @@ function makeNewTile(){
     }
     clearInterval(invokeTile); // Clear the previous interval
     invokeTile = setInterval(makeNewTile, tileIntervals); // Set new interval value
+    currentChartIndex++;
 }
 
 // Draw tiles on the canvas
@@ -76,7 +88,6 @@ function moveTiles() {
     }, 10);
 
 }
-
 // Check if player hit a tile
 function checkCollision(keyCode) {
     const letter = String.fromCharCode(keyCode);

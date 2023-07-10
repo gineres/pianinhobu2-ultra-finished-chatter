@@ -285,10 +285,26 @@ io.on('connection', socket => {
 
     //GAME
     socket.on('CheckPianoConnection', (sessionId, matchUrl) => {
-        const matchId = matchUrl.substring(url.indexOf('#') + 1);
+        const matchId = matchUrl.substring(matchUrl.indexOf('#') + 1);
+
+        console.log('TAMANHO DO CHART:' + matches[matchId].chart.length);
+
+        // gera o chart uma única vez
+        if (matches[matchId].chart.length === 0) {
+            // gerar o chart
+            for (let index = 0; index < 100; index++) {
+                var randomTile = Math.floor(Math.random() * 4);
+                matches[matchId].chart.push(randomTile);
+            }
+        }
+
+        console.log('CHART DEPOIS DA MACUMBA: '+ matches[matchId].chart);
+
         if (matches[matchId].players[sessionId]) {
             matches[matchId].players[sessionId].sockets.push(socket.id);
+            socket.emit('GetChart', matches[matchId].chart);
             // CONNECT PLAYER AND PROVIDE HIM THE FINITE CHART
+            // PROVIDE LIST OF PLAYERS AND ETC EVERYTIME SOMEONE CONNECTS (TO THE ROOM)
             // ADD PLAYERS TO THE ROOM TO BE ABLE TO PROVIDE SCORES AND STUFF
         } else {
             // Kick the user
