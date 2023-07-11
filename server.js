@@ -103,15 +103,10 @@ io.on('connection', socket => {
                 playerInstances: []
             }
             sessions[session.sessionId] = session; //adiciona sessão com ID único
-
-            //console.log("SUCCESS",socket,"LoginEvents");
             asyncEmit("SUCCESS",socket,"LoginEvents");
-            //io.emit('players', players);
-            //socket.emit('Message', 'paravbens voce entrou'); NAO FUNCIONA
         }
         else {
             asyncEmit("INFORMAÇÕES ERRADAS",socket,"LoginEvents");
-            //console.log("INFORMAÇÕES ERRADAS",socket,"LoginEvents");
         }
     });
 
@@ -123,7 +118,6 @@ io.on('connection', socket => {
         if (session !== undefined) {
             console.log('Usuário está conectado!');
             socket.emit('SelectRoomRedirect');
-            //socket.emit('ChatRedirect');
         }
         else{
             console.log('Usuário não conectado.');
@@ -139,15 +133,13 @@ io.on('connection', socket => {
         rooms['room'+roomCount].players[sessionId] = 'notify'; //o usuário é novo!
         sessions[sessionId].room = roomCount;
         socket.emit('ChatRedirect', rooms['room'+roomCount].players[sessionId]);
-        //socket.join("room"+roomCount); NÃO FUNCIONA PQ VAI MUDAR DE URL
     });
 
     socket.on('EnterRoom', (roomNumber, sessionId) => {
         console.log('......'+roomNumber+'.........');
         if (rooms['room'+roomNumber].players[sessionId] !== undefined) {
-            rooms['room'+roomNumber].players[sessionId] = 'dontNotify';  //o usuário tá com mais de uma aba aberta, não precisa notificar a entrada dele de novo
-            socket.emit('ChatRedirect', rooms['room'+roomNumber].players[sessionId]); //preciso fazer essa mesma coisa na checagem de conexão, o ideal é q se a pessoa tiver
-            //conectada ela nem tenha a possibilidade de estar na pagina de room selection
+            rooms['room'+roomNumber].players[sessionId] = 'dontNotify';
+            socket.emit('ChatRedirect', rooms['room'+roomNumber].players[sessionId]);
         }
         else{
             rooms['room'+roomNumber].players[sessionId] = 'notify';  //o usuário é novo!
@@ -172,10 +164,6 @@ io.on('connection', socket => {
             //console.log('você está conectado!');
             const playerRoom = 'room'+sessions[sessionId].room;
             socket.emit('GetActivePlayers', rooms[playerRoom].activePlayers);
-            //checar se já tem outro socket ativo com a mesma sessão, se sim, usar socket.disconnect() nele e copiar as informações de cor e posição pra o novo socket
-            //Solução 2: colocar todos os sockets de uma mesma sessão dentro de uma sala (com o ID da sessão), e todos os usuários dessa sala vão se comportar de maneiras idênticas, porque são o mesmo usuário
-            //por enquanto, ignorar isso e fazer sockets individuais funcionarem
-
             if (Object.keys(rooms[playerRoom].players).length === 1) {
                 isHost = true;
                 isReady = true;
@@ -227,10 +215,6 @@ io.on('connection', socket => {
     });
 
     socket.on('SendMessage', (msg, room) => {
-        //console.log(socket.rooms.has("room1"));
-        //filtrar se o texto tem "to [username]: antes, se sim, envia mensagem privada, se não, envia msg global"
-        //const remetente = activePlayers[socket.id].session.username;
-
         const remetente = rooms['room'+room].activePlayers[socket.id].session.username;
         const formattedText = `${remetente}: ${msg}`;
         io.to('room'+room).emit('NewMessage', formattedText);
@@ -387,8 +371,5 @@ io.on('connection', socket => {
 });
 
 const PORT = 3000;
-
-//const USERS_FILE_PATH = './registeredUsers.json';
-
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

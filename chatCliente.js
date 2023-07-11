@@ -70,8 +70,8 @@ function gameLoop() {
     updateGraphics();
     requestAnimationFrame(gameLoop);
 }
-//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
 function SetReady(){
     let readyPlayers = {};
     const buttonText = document.getElementById('setReady').innerText;
@@ -82,7 +82,6 @@ function SetReady(){
         if (otherPlayers.hasOwnProperty(key)) {
             if (otherPlayers[key].isReady) {
                 readyPlayers[key] = otherPlayers[key];
-                //context.fillText('[READY!!!]', otherPlayers[key].playerX - 20, otherPlayers[key].playerY + 40);
             }
         }
     }
@@ -102,17 +101,6 @@ function SetReady(){
     }
 }
 
-//Checa se o usuário tá logado, se sim, muda de página para a página de login
-function IsLoggedIn(){ //RODAR ASSIM QUE ENTRAR?
-    const meuid = localStorage.getItem('meuid');
-    socket.emit("CheckChatSession", meuid);
-}
-
-socket.on('UpdatingPlayerPositions', (newPosition, sessionId) => {
-    otherPlayers[sessionId].playerX = newPosition;
-});
-
-//TROCA DE MENSAGENS-------------------------------------------------------------
 function SendMessage(){
     const meuid = localStorage.getItem('meuid');
     const messageText = document.getElementById('messageInput').value;
@@ -120,6 +108,11 @@ function SendMessage(){
     console.log(messageText);
     document.getElementById('messageInput').value = "";
 }
+
+//EVENTOS DO SERVIDOR -------------------------------------------------------------
+socket.on('UpdatingPlayerPositions', (newPosition, sessionId) => {
+    otherPlayers[sessionId].playerX = newPosition;
+});
 
 socket.on('NewUserNotification', (msg, position, color, session, isHost, isReady) => {
     const mensagens = document.getElementById('mensagens');
@@ -176,23 +169,25 @@ socket.on('UpdatePlayerReadyStatus', (isReady, sessionId) =>{
 });
 
 socket.on('PlayerDisconnected', (msg, sessionId) => {
-    //console.log(msg);
     const mensagens = document.getElementById('mensagens');
     mensagens.innerHTML += `<p style="color: green">${msg}</p>`;
     delete otherPlayers[sessionId];
 });
+
 //---------------------------------------------------------------------------------
 
+//Lida com a desconexão do jogador
 window.addEventListener('beforeunload', function(event) {
     if (isClientConnected) {
         socket.emit('DisconnectFromChat');
     }
-    
-    // Perform your desired action here
-    // This message will be ignored by most modern browsers, but it can be used to display a confirmation dialog
-    //event.returnValue = 'Are you sure you want to leave this page?';
 });
-  
+
+//Checa se o usuário tá logado, se não, muda de página para a página de login
+function IsLoggedIn(){
+    const meuid = localStorage.getItem('meuid');
+    socket.emit("CheckChatSession", meuid);
+}
 
 
 //Start the game loop
