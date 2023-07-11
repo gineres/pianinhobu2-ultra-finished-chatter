@@ -87,8 +87,15 @@ function SetReady(){
         }
     }
     if (buttonText === 'START MATCH') {
-        //matchPrefix, readyPlayers 
-        socket.emit("StartMatch", otherPlayers[meuid].room+'-match', readyPlayers);
+        const minPlayers = 2; // MÍNIMO DE JOGADORES NECESSÁRIOS
+        if (Object.keys(readyPlayers).length < minPlayers) { 
+            const mensagens = document.getElementById('mensagens');
+            mensagens.innerHTML += `<p style="color: red">NÚMERO MÍNIMO DE PLAYERS NÃO ATINGIDO, TEM ${Object.keys(readyPlayers).length} JOGADORES PRONTOS, NECESSITA DE ${minPlayers}</p>`;
+        }
+        else {
+            socket.emit("StartMatch", otherPlayers[meuid].room+'-match', readyPlayers);
+        }
+        
     }
     else {
         socket.emit("SetPlayerReady", otherPlayers[meuid].room);
