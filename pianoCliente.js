@@ -50,11 +50,14 @@ socket.on('StartGame', (shouldStart, players) => {
 
 socket.on('FinishGame', (shouldRedirect) => {
     if (shouldRedirect) {
+        const matchUrl = window.location.href;
+        const roomNumberIndex = matchUrl.indexOf('#') + 1;
+        const roomNumber = matchUrl[roomNumberIndex];
+        console.log(roomNumber);
         for (let key in playersList){
             if (playersList.hasOwnProperty(key)) {
                 // EMITE DE VOLTA PRO SOCKET E NO SOCKET VAI MANDAR TODO MUNDO PRESENTE NA SALA DE VOLTA PRO CHAT
-                const scoreElement = document.getElementById("playersRanking");
-                scoreElement.innerHTML += `<p id=${playersList[key].username} class="rankingSlot" style="background-color: blueviolet;">${playersList[key].username} ${playersList[key].score}</p>`;
+                socket.emit("EnterRoom", roomNumber, key);
                 //<!--<p class="rankingSlot" style="background-color: blueviolet;">FULANO 20000</p>-->
             }
         }
@@ -62,6 +65,10 @@ socket.on('FinishGame', (shouldRedirect) => {
     else{
         console.log('waiting for players');
     }
+});
+
+socket.on('ChatRedirect', (msg) => {
+    window.location.href = "http://localhost:3000/chat.html";
 });
 
 socket.on('ScoresUpdated', (players, sessionId) => {
