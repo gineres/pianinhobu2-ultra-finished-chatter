@@ -179,6 +179,21 @@ io.on('connection', socket => {
             if (Object.keys(rooms[playerRoom].players).length === 1) {
                 isHost = true;
                 isReady = true;
+            } else if (matches[sessions[sessionId].room+'-match'] !== undefined) {
+                let isRank1 = true;
+                const playersInRoom = matches[sessions[sessionId].room+'-match'].players;
+                for (let key in playersInRoom){
+                    if (playersInRoom.hasOwnProperty(key)) {
+                        if (playersInRoom[sessionId].score < playersInRoom[key].score) {
+                            isRank1 = false;
+                            break;
+                        }
+                    }
+                }
+                if (isRank1) {
+                    isHost = true;
+                    isReady = true;
+                }
             }
 
             const player = {
