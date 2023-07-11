@@ -23,23 +23,60 @@ var invokeTile;
 let chart;
 let currentChartIndex = 0;
 
+let playersList = {};
+
 socket.on('GetChart', (receivedChart) => {
     chart = receivedChart;
     console.log('O CHART CHEGOU' + chart);
     socket.emit('ChartReceived', meuid, window.location.href);
 });
 
-socket.on('StartGame', (shouldStart) => {
+socket.on('StartGame', (shouldStart, players) => {
     if (shouldStart) {
+        playersList = Object.assign({}, players);
         invokeTile = setInterval(makeNewTile, tileIntervals);
+        for (let key in playersList){
+            if (playersList.hasOwnProperty(key)) {
+                const scoreElement = document.getElementById("playersRanking");
+                scoreElement.innerHTML += `<p id=${playersList[key].username} class="rankingSlot" style="background-color: blueviolet;">${playersList[key].username} ${playersList[key].score}</p>`;
+                //<!--<p class="rankingSlot" style="background-color: blueviolet;">FULANO 20000</p>-->
+            }
+        }
     }
     else{
         console.log('waiting for players');
     }
 });
 
+socket.on('FinishGame', (shouldRedirect) => {
+    if (shouldRedirect) {
+        for (let key in playersList){
+            if (playersList.hasOwnProperty(key)) {
+                // EMITE DE VOLTA PRO SOCKET E NO SOCKET VAI MANDAR TODO MUNDO PRESENTE NA SALA DE VOLTA PRO CHAT
+                const scoreElement = document.getElementById("playersRanking");
+                scoreElement.innerHTML += `<p id=${playersList[key].username} class="rankingSlot" style="background-color: blueviolet;">${playersList[key].username} ${playersList[key].score}</p>`;
+                //<!--<p class="rankingSlot" style="background-color: blueviolet;">FULANO 20000</p>-->
+            }
+        }
+    }
+    else{
+        console.log('waiting for players');
+    }
+});
+
+socket.on('ScoresUpdated', (players, sessionId) => {
+    playersList[sessionId].score = players[sessionId].score;
+    playersList[sessionId].combo = players[sessionId].combo;
+    document.getElementById(playersList[sessionId].username).innerHTML = `${playersList[sessionId].username} ${playersList[sessionId].score}`;
+})
+
 function makeNewTile(){
     //console.log(chart);
+    if (currentChartIndex+1 === chart.length) {
+        clearInterval(invokeTile);
+        socket.emit('ChartFinished', meuid, window.location.href);
+        return;
+    }
 
     var randomTile = chart[currentChartIndex];
     if (randomTile == 0) {
@@ -62,7 +99,9 @@ function makeNewTile(){
     }
     clearInterval(invokeTile); // Clear the previous interval
     invokeTile = setInterval(makeNewTile, tileIntervals); // Set new interval value
-    currentChartIndex++;
+    if (currentChartIndex < (chart.length - 1)) {
+        currentChartIndex++;
+    }
 }
 
 // Draw tiles on the canvas
@@ -106,8 +145,9 @@ function checkCollision(keyCode) {
         if (tile.y >= canvas.height - tileHeight && tile.y <= canvas.height && tile.isActive) {
             feedbackText = 'HIT!';
             tile.isActive = false;
-            score+=Math.floor(combo*tileSpeed*50);
+            score+=Math.floor((combo+1)*tileSpeed*50);
             combo++;
+            socket.emit('GameEvent', meuid, window.location.href, score, combo);
         }
         return;
     }

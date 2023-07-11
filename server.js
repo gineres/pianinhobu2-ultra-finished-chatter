@@ -292,7 +292,7 @@ io.on('connection', socket => {
         // gera o chart uma única vez
         if (matches[matchId].chart.length === 0) {
             // gerar o chart
-            for (let index = 0; index < 100; index++) {
+            for (let index = 0; index < 150; index++) {
                 var randomTile = Math.floor(Math.random() * 4);
                 matches[matchId].chart.push(randomTile);
             }
@@ -313,12 +313,26 @@ io.on('connection', socket => {
     });
 
     socket.on('ChartFinished', (sessionId, matchUrl) => {
+        let allChartsFinished = true;
         const matchId = matchUrl.substring(matchUrl.indexOf('#') + 1);
         if (matches[matchId].players[sessionId]) {
             matches[matchId].players[sessionId].chartFinished = true;
         }
         
+        for (let key in matches[matchId].players){
+            if (matches[matchId].players.hasOwnProperty(key)) {
+                if (!(matches[matchId].players[key].chartFinished)) {
+                    allChartsFinished = false;
+                    break;
+                }
+            }
+        }
 
+        if (allChartsFinished) {
+            io.to(matchId).emit('FinishGame', true, matches[matchId].players); // manda todo mundo de volta
+        } else {
+            io.to(matchId).emit('FinishGame', false); // waiting for players
+        }
         //Check if all players in the match finished the chart, while not, other players are left waiting for until 30 seconds
         //if yes, send a signal to all players in the room to show the final results
     });
@@ -340,19 +354,20 @@ io.on('connection', socket => {
         }
 
         if (allChartsReceived) {
-            io.to(matchId).emit('StartGame', true); //'waiting for players'
+            io.to(matchId).emit('StartGame', true, matches[matchId].players); 
         } else {
-            io.to(matchId).emit('StartGame', false);
+            io.to(matchId).emit('StartGame', false);//'waiting for players'
         }
-
-        console.log();
 
         //Check if all players in the match received the chart, while not, other players are left waiting for until 30 seconds
         //if yes, send a signal to all players in the room to start the game
     });
 
     socket.on('GameEvent', (sessionId, matchUrl, score, combo) => {
-        //
+        const matchId = matchUrl.substring(matchUrl.indexOf('#') + 1);
+        matches[matchId].players[sessionId].score = score;
+        matches[matchId].players[sessionId].combo = combo;
+        io.to(matchId).emit('ScoresUpdated', matches[matchId].players, sessionId);
     });
 });
 
